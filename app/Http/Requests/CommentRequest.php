@@ -2,18 +2,19 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Comment;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CommentRequest extends FormRequest
 {
 
-    public function authorize()
+    public function authorize():bool
     {
-        return auth()->check();
+        return $this->user()->can('create', Comment::class);
     }
 
 
-    public function rules()
+    public function rules():array
     {
         return [
             'message'=>'required',

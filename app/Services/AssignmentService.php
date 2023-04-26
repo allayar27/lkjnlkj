@@ -2,79 +2,48 @@
 
 namespace App\Services;
 
-use App\Http\Requests\AssignmentRequest;
-use App\Http\Resources\AssignmentCollection;
-use App\Http\Resources\AssignmentResource;
 use App\Models\Assignment;
-use App\Services\Contracts\AssignmentContract;
-use App\Traits\ApiResponser;
 
-class AssignmentService implements AssignmentContract
+final class AssignmentService
 {
-    use ApiResponser;
+    /** @var Assignment */
+    private $assignment;
 
-    public function get()
-    {
-        $assignment = Assignment::orderBy('created_at', 'DESC')->get();
-        return new AssignmentCollection($assignment);
-    }
+    /** @var \App\Services\FileUploader */
+    private $fileUploader;
 
-    public function show($id)
+    public function __construct(Assignment $assignment, \App\Services\FileUploader $fileUploader)
     {
-        $assignment = Assignment::findOrFail($id);
-        return new AssignmentResource($assignment);
+        $this->assignment = $assignment;
+        $this->fileUploader = $fileUploader;
     }
 
     public function search($title)
     {
-        $result = Assignment::where('title', 'LIKE', '%'. $title .'%')->get();
-
-        if(count($result)){
-            return $this->success($result,'found',200);
-        }
-        else {
-            return $this->error('No Data not found',404);
-        }
+        return $this->assignment
+                    ->where('title', 'LIKE', '%'. $title .'%')
+                    ->get();
     }
 
-    public function create($request)
+    public function create(array $request)
     {
-        $validated = $request->validated();
-
-        if ($request->has('file')){
-            $file = $request->file('file')->getClientOriginalName();
-        }
-        $request->file->move(public_path('/assignment'), $file);
-        $validated['file'] = $file;
-        $create = Assignment::create($validated);
-        if (!$create){
-            return $this->error('creating process is failed!',400);
-        }
-        return $this->success($create,'created successfully',201);
-
+        $fileName = $request['file']->getClientOriginalName();
+        $this->fileUploader->upload('/assignment', $fileName);
+        $request['file'] = $fileName;
+        return $this->assignment->create($request);
     }
 
-    public function update($request, $id)
+    public function update($id, array $request)
     {
-        $request = new AssignmentRequest();
-        $validated = $request->validated();
+        if ($request['file']){
+            $this->fileUploader->deleteFile($this->assignment->file);
 
-        if ($request->has('file')){
-            $file = $request->file('file')->getClientOriginalName();
-            $validated['file'] = $file;
-            $request->file->move(public_path('/assignment'), $file);
+            $fileName = $request['file']->getClientOriginalName();
+            $this->fileUploader->upload('/assignment', $fileName);
+            $request['file'] = $fileName;
         }
-        $update = Assignment::where('id', $id)->update($validated);
-
-        if(!$update) {
-            return $this->error('not updated!',400);
-        }
-        return $this->success($update, 'updated successfully', 200);
+        return $this->assignment->where('id', $id)->update($request);
+        
     }
 
-    public function delete($id)
-    {
-        $delete = Assignment::findOrFail($id)->delete();
-        return $this->success($delete,'Assignment deleted successfully!',200);
-    }
 }

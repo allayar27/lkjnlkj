@@ -15,8 +15,8 @@ class LessonPolicy
     {
        if($user->can('viewAny-lessons')){
            return Response::allow();
-       };
-        return Response::deny('Вам запрешено');
+       }
+       return Response::deny('Вам запрешено');
     }
 
 
@@ -24,8 +24,8 @@ class LessonPolicy
     {
        if($user->can('view-lessons')){
            return Response::allow();
-       };
-        return Response::deny('Вам запрешено');
+       }
+       return Response::deny('Вам запрешено');
     }
 
 
@@ -33,8 +33,8 @@ class LessonPolicy
     {
        if($user->can('create-lessons')){
            return Response::allow();
-       };
-        return Response::deny('Вам запрешено');
+       }
+       return Response::deny('Вам запрешено');
     }
 
 
@@ -42,8 +42,8 @@ class LessonPolicy
     {
        if($user->can('edit-lessons')){
            return Response::allow();
-       };
-        return Response::deny('Вам запрешено');
+       }
+       return Response::deny('Вам запрешено');
     }
 
 
@@ -51,8 +51,8 @@ class LessonPolicy
     {
        if($user->can('delete-lessons')){
            return Response::allow();
-       };
-        return Response::deny('Вам запрешено');
+       }
+       return Response::deny('Вам запрешено');
     }
 
 

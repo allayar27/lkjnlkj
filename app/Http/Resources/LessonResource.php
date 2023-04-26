@@ -11,7 +11,6 @@ class LessonResource extends JsonResource
     {
 
         return [
-
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
@@ -19,9 +18,6 @@ class LessonResource extends JsonResource
             'video' => $this->video,
             'category' => $this->category->name,
             'created_at' => date_format($this->created_at, 'd/m/Y H:i:s'),
-            'assignments' => AssignmentResource::collection($this->assignments),
-            'additionals' => AdditionalResource::collection($this->additionals),
-
         ];
     }
 }

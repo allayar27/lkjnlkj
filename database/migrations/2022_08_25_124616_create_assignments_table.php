@@ -18,7 +18,7 @@ class CreateAssignmentsTable extends Migration
             $table->string('title');
             $table->datetime('due_date');
             $table->string('file');
-            $table->foreignIdFor(\App\Models\Lesson::class)->constrained()->cascadeOnDelete();
+            $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

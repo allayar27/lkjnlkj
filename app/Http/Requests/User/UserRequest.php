@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserRequest extends FormRequest
 {
 
-    public function authorize()
+    public function authorize():bool
     {
-        return auth()->check();
+        return $this->user()->can('create-users', User::class);
     }
 
 
-    public function rules()
+    public function rules():array
     {
         return [
             'name' => 'required|string|max:255',
@@ -21,4 +22,5 @@ class UserRequest extends FormRequest
             'password' => 'required|min:8',
         ];
     }
+
 }

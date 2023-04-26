@@ -3,63 +3,53 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AuthRequest;
+use App\Http\Requests\Auth\LoginFormRequest;
+use App\Http\Requests\Auth\SignUpFormRequest;
 use App\Models\User;
 use App\Traits\ApiResponser;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    use ApiResponser;
-
-    public function register(AuthRequest $request)
+    
+    public function register(SignUpFormRequest $request)
     {
-
         $validated = $request->validated();
-        $validated['password'] = Hash::make($validated['password']);
+        $validated['password'] = bcrypt($validated['password']);
 
         $user = User::create($validated);
-        if ($user['id'] == 1){
-            $user->assignRole('super-admin');
-        }
-        else{
-            $user->assignRole('user');
-        }
+        $user->assignRole('user');
 
-        return $this->success([
+        return response([
             'token' => $user->createToken('api_token')->plainTextToken,
             'user' => $user
         ]);
 
     }
 
-    public function login(Request $request)
+    public function login(LoginFormRequest $request)
     {
-        $attr = $request->validate([
-            'email' => 'required|string|email|exists:users',
-            'password' => 'required|string|min:8'
-        ]);
+        $valid = $request->validated();
 
-        if (!Auth::attempt($attr)) {
-            return $this->error('Credentials not match', 401);
+        $user = User::whereEmail($request->email)->first();
+        if (!auth()->attempt($valid)) {
+            return $this->error('Credentials not match', Response::HTTP_UNAUTHORIZED);
         }
-
-        $user = User::where('email', $request['email'])->firstOrFail();
-
-        return $this->success([
+ 
+        return response([
             'token' => $user->createToken('API Token')->plainTextToken,
             'user_name' => $user->name,
-            'role' => $user->roles[0]['name']
+            'role' => $user->getRoleNames()
         ]);
+
     }
 
     public function logout()
     {
-        auth()->user()->tokens()->delete();
-        return [
+        Auth::user()->tokens()->delete();
+        return response([
             'message' => 'Tokens Revoked'
-        ];
+        ]);
     }
 }

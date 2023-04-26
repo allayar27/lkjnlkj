@@ -19,7 +19,7 @@ class CreateLessonsTable extends Migration
             $table->text('description');
             $table->string('image');
             $table->string('video');
-            $table->foreignIdFor(\App\Models\Category::class)->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

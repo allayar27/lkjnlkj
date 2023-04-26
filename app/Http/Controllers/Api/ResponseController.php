@@ -3,43 +3,69 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ResponseRequest;
+use App\Http\Requests\Response\ResponseRequest;
+use App\Http\Requests\Response\ResponseUpdateRequest;
+use App\Http\Resources\ResponseResource;
 use App\Models\Response;
-use App\Services\Contracts\ResponseContract;
+use App\Services\ResponseService;
+use App\Traits\ApiResponser;
 
 class ResponseController extends Controller
 {
-    public function index(Response $response, ResponseContract $responseContract)
+    use ApiResponser;
+
+    /** @var ResponseService */
+    private $service;
+
+    public function __construct(ResponseService $service)
     {
-        $this->authorize('viewAny',$response);
-        return $responseContract->get();
+        $this->service = $service;
     }
 
-    public function show($id, ResponseContract $responseContract)
+
+    public function index(Response $response)
     {
-        $response = Response::findOrFail($id);
+        $this->authorize('viewAny-responses',$response);
+        $collection = $response->orderBy('created_at', 'desc')->get();
+        return ResponseResource::collection($collection);
+    }
+
+
+    public function show(Response $response)
+    {
+        $response = $response->findOrFail($response->id);
         $this->authorize('view', $response);
-        return $responseContract->getId($id);
+        return new ResponseResource($response);
     }
 
 
-    public function store(ResponseRequest $request, Response $response, ResponseContract $responseContract)
+    public function store(ResponseRequest $request)
     {
-        $this->authorize('create', $response);
-        return $responseContract->create($request);
+        $valid = $request->validated();
+        $create = $this->service->create($valid);
+        if (!$create){
+            return $this->error('creating process is failed!',400);
+        }
+        return $this->success($create,'created successfully',201);
     }
 
-    public function update(ResponseRequest $request, $id, ResponseContract $responseContract)
+
+    public function update(Response $response, ResponseUpdateRequest $request)
     {
-        $response = Response::findOrFail($id);
-        $this->authorize('update', $response);
-        return $responseContract->update($request,$id);
+        $valid = $request->validated();
+        $update = $this->service->update($response->id, $valid);
+        if (!$update){
+            return $this->error('updating process is failed!',400);
+        }
+        return $this->success($update,'updated successfully!',200);
     }
 
-    public function destroy($id, ResponseContract $responseContract)
+
+    public function destroy(Response $response)
     {
-       $response = Response::findOrFail($id);
-       $this->authorize('delete', $response);
-       return $responseContract->delete($id);
+       $response = $response->findOrFail($response->id);
+       $this->authorize('delete-responses', $response);
+       $delete = $response->delete();
+       return $this->success($delete, 'responses deleted', 200);
     }
 }

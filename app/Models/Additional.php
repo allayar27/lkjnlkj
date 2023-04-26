@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Additional extends Model
 {
@@ -15,7 +16,7 @@ class Additional extends Model
         'lesson_id'
     ];
 
-    public function lesson()
+    public function lesson():BelongsTo
     {
         return $this->belongsTo(Lesson::class);
     }

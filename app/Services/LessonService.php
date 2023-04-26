@@ -2,73 +2,46 @@
 
 namespace App\Services;
 
-use App\Http\Resources\LessonCollection;
-use App\Http\Resources\LessonResource;
 use App\Models\Lesson;
-use App\Services\Contracts\LessonContract;
-use App\Traits\ApiResponser;
 
-class LessonService implements LessonContract
+final class LessonService
 {
-    use ApiResponser;
 
-    public function get()
+    /** @var Lesson */
+    private $lesson;
+
+    /** @var FileUploader */
+    private $fileUploader;
+
+    public function __construct(Lesson $lesson, FileUploader $fileUploader)
     {
-        $lesson = Lesson::orderBy('created_at', 'DESC')->get();
-        return new LessonCollection($lesson);
+        $this->lesson = $lesson;
+        $this->fileUploader = $fileUploader;
     }
 
-    public function show($id)
-    {
-        $lesson = Lesson::findOrFail($id);
-        return new LessonResource($lesson);
-    }
 
-    public function create($request)
+    public function create(array $request)
     {
-        $validated = $request->validated();
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image')->getClientOriginalName();
-        }
-        $request->image->move(public_path('/images'), $image);
-        $validated['image'] = $image;
-        $create = Lesson::create($validated);
-        if (!$create){
-            return $this->error('creating process is failed!',400);
-        }
-        return $this->success($create,'created successfully',201);
+        $filename = $request['image']->getClientOriginalName();
+        $this->fileUploader->upload('/images', $filename);
+        $request['image'] = $filename;
+        return $this->lesson->create($request);
     }
 
     public function search($title)
     {
-        $result = Lesson::where('title', 'LIKE', '%'. $title .'%')->get();
-        if(count($result)){
-            return $this->success($result,'found',200);
-        }
-        else {
-            return $this->error('No Data not found',404);
-        }
+        return $this->lesson->where('title', 'LIKE', '%'. $title .'%')->get();
     }
 
-    public function update($request, $id)
+    public function update($id, array $request)
     {
-        $validated = $request->validated();
-        if ($request->hasFile('image')){
-            $image = $request->file('image')->getClientOriginalName();
-            $validated['image'] = $image;
-            $request->media->move(public_path('/images'), $image);
+        if($request['image']){
+            $this->fileUploader->deleteFile($this->lesson->image);
+            $filename = $request['image']->getClientOriginalName();
+            $this->fileUploader->upload('/images', $filename);
+            $request['image'] = $filename;
         }
-        $update = Lesson::where('id', $id)->update($validated);
-        if (!$update){
-            return $this->error('updating process is failed!',400);
-        }
-        return $this->success($update,'updated successfully',200);
+        return $this->lesson->where('id', $id)->update($request);
     }
 
-    public function delete($id)
-    {
-       $lesson = Lesson::findOrFail($id)->delete();
-        return $this->success($lesson,'lesson deleted successfully!',200);
-    }
 }

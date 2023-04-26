@@ -11,10 +11,9 @@ class AssignmentResource extends JsonResource
     {
 
         return [
-
             'id' => $this->id,
             'title' => $this->title,
-            'due_date' => $this->due_date,
+            'due_date' => date_format($this->due_date, 'd/m/Y H:i:s'),
             'file' => url('assignment/',$this->file),
             'lesson' => $this->lesson->title,
             'created_at' => date_format($this->created_at, 'd/m/Y H:i:s'),

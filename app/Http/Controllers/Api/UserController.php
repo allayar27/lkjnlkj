@@ -3,43 +3,67 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserRequest;
-use App\Http\Resources\UserCollection;
+use App\Http\Requests\User\UserRequest;
+use App\Http\Requests\User\UserUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\Contracts\UserContract;
+use App\Services\UserService;
+use App\Traits\ApiResponser;
 
 
 class UserController extends Controller
 {
+    use ApiResponser;
+
+    /** @var UserService */
+    private $service;
+
+    public function __construct(UserService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index(User $user)
     {
         $this->authorize('viewAny', $user);
-        return new UserCollection(User::orderBy('created_at', 'DESC')->get());
+        $collection = $user->orderBy('created_at', 'DESC')->get();
+        return UserResource::collection($collection);
     }
 
-    public function show($id, User $user)
+    public function show(User $user)
     {
         $this->authorize('view', $user);
-        $user = User::findOrFail($id);
+        $user = $user->findOrFail($user->id);
         return new UserResource($user);
     }
 
-    public function create(UserRequest $request, User $user, UserContract $userContract)
+    public function create(UserRequest $request)
     {
-        $this->authorize('create', $user);
-        return $userContract->create($request);
+        $valid = $request->validated();
+        $create = $this->service->create($valid);
+        if (!$create){
+            return $this->error('creating was failed', 400);
+        }
+        return $this->success([
+            $create,
+            'token' => $create->createToken('bearer-token')->plainTextToken
+        ],'created successfully!',201);
     }
 
-    public function update(UserRequest $request, $id, User $user, UserContract $userContract)
+    public function update(User $user, UserUpdateRequest $request)
     {
-        $this->authorize('update', $user);
-        return $userContract->update($request, $id);
+        $valid = $request->validated();
+        $update = $user->where('id', $user->id)->update($valid);
+        if(!$update){
+            return $this->error('Updating is failed!',400);
+        }
+        return $this->success($update,'Updated successfully!',200);
     }
 
-    public function destroy($id, User $user, UserContract $userContract)
+    public function destroy(User $user)
     {
         $this->authorize('delete', $user);
-        return $userContract->delete($id);
+        $delete = $user->findOrFail($user->id)->delete();
+        return $this->success($delete,'deleted successfully!',200);
     }
 }

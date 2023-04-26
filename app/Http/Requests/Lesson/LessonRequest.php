@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Lesson;
 
+use App\Models\Lesson;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonRequest extends FormRequest
 {
 
-    public function authorize()
+    public function authorize(): bool
     {
-        return auth()->check();
+        return $this->user()->can('create-lessons', Lesson::class);
     }
 
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => 'required|string',

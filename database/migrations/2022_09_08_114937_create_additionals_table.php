@@ -17,7 +17,7 @@ class CreateAdditionalsTable extends Migration
             $table->id();
             $table->string('title');
             $table->string('media');
-            $table->foreignIdFor(\App\Models\Lesson::class)->constrained()->cascadeOnDelete();
+            $table->foreignId('lesson_id')->constrained()->OnDelete('cascade');
             $table->timestamps();
         });
     }

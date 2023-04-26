@@ -38,7 +38,7 @@ class UserPolicy
     }
 
 
-    public function update(?User $user, User $model)
+    public function update(?User $user)
     {
         if($user->can('edit-users')){
             return Response::allow();
@@ -47,7 +47,7 @@ class UserPolicy
     }
 
 
-    public function delete(?User $user, User $model)
+    public function delete(?User $user)
     {
         if($user->can('delete-users')){
             return Response::allow();

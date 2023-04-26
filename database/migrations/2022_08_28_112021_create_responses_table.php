@@ -17,8 +17,8 @@ class CreateResponsesTable extends Migration
             $table->id();
             $table->string('file');
             $table->string('title');
-            $table->foreignIdFor(\App\Models\Assignment::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(\App\Models\User::class)->constrained()->cascadeOnDelete();
+            $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->OnDelete('cascade');
             $table->timestamps();
         });
     }

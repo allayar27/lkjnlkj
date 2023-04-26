@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Lesson extends Model
 {
@@ -17,10 +18,6 @@ class Lesson extends Model
         'category_id'
     ];
 
-//    public function getImageNameAttribute($value)
-//    {
-//        return public_path($value);
-//    }
 
     public function assignments()
     {
@@ -36,4 +33,8 @@ class Lesson extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    protected $casts = [
+        'created_at' => 'datetime:d/m/Y H:i:s'
+    ];
 }

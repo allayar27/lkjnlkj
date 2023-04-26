@@ -11,14 +11,12 @@ class UserResource extends JsonResource
     {
 
         return [
+
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'password' => $this->password,
-            'created_at' => date($this->created_at),
-            'comments' => CommentResource::collection($this->comments),
+            'created_at' => date_format($this->created_at, 'd/m/Y H:i:s'),
             'responses' => ResponseResource::collection($this->responses)
-
         ];
     }
 }

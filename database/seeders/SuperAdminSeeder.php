@@ -19,6 +19,6 @@ class SuperAdminSeeder extends Seeder
         ]);
         $user->assignRole('super-admin');
         $user->createToken('api_token')->plainTextToken;
-
+        
     }
 }

@@ -10,7 +10,6 @@ class ResponsePolicy
 {
     use HandlesAuthorization;
 
-
     public function viewAny(?User $user)
     {
         if($user->can('viewAny-responses')){
@@ -41,9 +40,11 @@ class ResponsePolicy
 
     public function update(?User $user, Response $response)
     {
-       if ($user->id === $response->user_id){
-           return \Illuminate\Auth\Access\Response::allow();
-       }
+        if ($user->can('edit-responses')) {
+            if ($user->id === $response->user_id) {
+                return \Illuminate\Auth\Access\Response::allow();
+            }
+        }
         return \Illuminate\Auth\Access\Response::deny('Вам запрешено');
 
     }
@@ -51,8 +52,10 @@ class ResponsePolicy
 
     public function delete(User $user, Response $response)
     {
-        if ($user->id === $response->user_id){
-            return \Illuminate\Auth\Access\Response::allow();
+        if ($user->can('delete-responses')) {
+            if ($user->id === $response->user_id) {
+                return \Illuminate\Auth\Access\Response::allow();
+            }
         }
         return \Illuminate\Auth\Access\Response::deny('Вам запрешено');
     }

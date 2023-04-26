@@ -99,18 +99,27 @@ class RoleAndPermissionSeeder extends Seeder
         ]);
 
         $userRole->givePermissionTo([
-            'view-additionals',
-
+            'viewAny-categories',
             'view-categories',
 
+            'viewAny-lessons',
             'view-lessons',
 
+            'viewAny-additionals',
+            'view-additionals',
+
+            'viewAny-assignments',
             'view-assignments',
 
+            'view-responses',
             'create-responses',
+            'edit-responses',
+            'delete-responses',
 
+            'viewAny-comments',
             'view-comments',
             'create-comments',
+            'delete-comments',
         ]);
 
     }

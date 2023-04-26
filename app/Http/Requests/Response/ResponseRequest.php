@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Response;
 
+use App\Models\Response;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ResponseRequest extends FormRequest
 {
 
-    public function authorize()
+    public function authorize():bool
     {
-        return auth()->check();
+        return $this->user()->can('create-responses', Response::class);
     }
 
 
-    public function rules()
+    public function rules():array
     {
         return [
             'file'=>'required|max:90000|mimes:xlsx,doc,docx,ppt,pptx,pdf,ods,odt,odp',
